@@ -1,0 +1,239 @@
+﻿@using GreenMeadowsPortal.ViewModels
+<!-- Views/Payroll/PayPeriodDetails.cshtml -->
+@model PayPeriodDetailsViewModel
+@{
+    ViewData["Title"] = "Pay Period Details - Green Meadows Portal";
+    Layout = "_AdminLayout";
+}
+
+<div class="page-header">
+    <h1>Pay Period Details</h1>
+    <nav class="breadcrumb">
+        <a asp-controller="Dashboard" asp-action="AdminDashboard">Admin</a> /
+        <a asp-controller="Payroll" asp-action="Index">Payroll</a> /
+        Pay Period
+    </nav>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Pay Period Information</h2>
+    </div>
+
+    <div class="pay-period-details">
+        <div class="detail-item">
+            <span class="label">Period ID:</span>
+            <span class="value">#@Model.PayPeriod.Id</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Start Date:</span>
+            <span class="value">@Model.PayPeriod.StartDate.ToString("MMMM dd, yyyy")</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">End Date:</span>
+            <span class="value">@Model.PayPeriod.EndDate.ToString("MMMM dd, yyyy")</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Status:</span>
+            <span class="value status @Model.PayPeriod.Status.ToLower()">@Model.PayPeriod.Status</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.PayPeriod.Notes))
+        {
+            <div class="detail-item notes">
+                <span class="label">Notes:</span>
+                <span class="value">@Model.PayPeriod.Notes</span>
+            </div>
+        }
+    </div>
+
+    @if (Model.PayPeriod.Status == "Open")
+    {
+        <div class="action-section">
+            <form asp-action="ProcessPayroll" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="payPeriodId" value="@Model.PayPeriod.Id" />
+                <button type="submit" class="btn primary-btn">
+                    <i class="fas fa-play-circle"></i> Process Payroll
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Employee Payments</h2>
+    </div>
+
+    @if (!Model.PayPeriod.EmployeePayments.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>No Payments</h3>
+            <p>This pay period has no processed payments yet.</p>
+            @if (Model.PayPeriod.Status == "Open")
+            {
+                <form asp-action="ProcessPayroll" method="post" class="mt-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="payPeriodId" value="@Model.PayPeriod.Id" />
+                    <button type="submit" class="btn primary-btn">
+                        <i class="fas fa-play-circle"></i> Process Payroll
+                    </button>
+                </form>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="payments-table-section">
+            <table class="payments-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Days Worked</th>
+                        <th>Total Hours</th>
+                        <th>Regular Hours</th>
+                        <th>Overtime Hours</th>
+                        <th>Gross Pay</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model.PayPeriod.EmployeePayments)
+                    {
+                        <tr>
+                            <td>
+                                <div class="employee-cell">
+                                    <div class="employee-avatar">
+                                        <img src="@(string.IsNullOrEmpty(payment.User.ProfileImageUrl) ? "/images/default-avatar.png" : payment.User.ProfileImageUrl)" alt="@payment.User.FullName">
+                                    </div>
+                                    <div class="employee-info">
+                                        <div class="employee-name">@payment.User.FirstName @payment.User.LastName</div>
+                                        <div class="employee-position">@payment.User.Position</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@payment.DaysWorked</td>
+                            <td>@payment.TotalHours.ToString("0.00")</td>
+                            <td>@payment.RegularHours.ToString("0.00")</td>
+                            <td>@payment.OvertimeHours.ToString("0.00")</td>
+                            <td>₱@payment.GrossPay.ToString("N2")</td>
+                            <td>₱@payment.Deductions.ToString("N2")</td>
+                            <td>₱@payment.NetPay.ToString("N2")</td>
+                            <td><span class="status @payment.Status.ToLower()">@payment.Status</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="EmployeeTimeRecords"
+                                       asp-route-userId="@payment.UserId"
+                                       asp-route-startDate="@Model.PayPeriod.StartDate.ToString("yyyy-MM-dd")"
+                                       asp-route-endDate="@Model.PayPeriod.EndDate.ToString("yyyy-MM-dd")"
+                                       class="btn small-btn">
+                                        Time Records
+                                    </a>
+                                    @if (payment.Status == "Pending")
+                                    {
+                                        <a href="#" class="btn small-btn primary approve-btn" data-id="@payment.Id">
+                                            Approve
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Staff Without Payments</h2>
+    </div>
+
+    @{
+        var staffWithPayments = Model.PayPeriod.EmployeePayments.Select(p => p.UserId).ToList();
+        var staffWithoutPayments = Model.StaffMembers.Where(s => !staffWithPayments.Contains(s.Id)).ToList();
+    }
+
+    @if (!staffWithoutPayments.Any())
+    {
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>All staff members have payments processed for this period.</p>
+        </div>
+    }
+    else
+    {
+        <div class="staff-table-section">
+            <table class="staff-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var staff in staffWithoutPayments)
+                    {
+                        <tr>
+                            <td>
+                                <div class="employee-cell">
+                                    <div class="employee-avatar">
+                                        <img src="@(string.IsNullOrEmpty(staff.ProfileImageUrl) ? "/images/default-avatar.png" : staff.ProfileImageUrl)" alt="@staff.FirstName @staff.LastName">
+                                    </div>
+                                    <div class="employee-info">
+                                        <div class="employee-name">@staff.FirstName @staff.LastName</div>
+                                        <div class="employee-email">@staff.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@staff.Position</td>
+                            <td>@staff.Department</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="EmployeeTimeRecords"
+                                       asp-route-userId="@staff.Id"
+                                       asp-route-startDate="@Model.PayPeriod.StartDate.ToString("yyyy-MM-dd")"
+                                       asp-route-endDate="@Model.PayPeriod.EndDate.ToString("yyyy-MM-dd")"
+                                       class="btn small-btn">
+                                        Time Records
+                                    </a>
+                                    <a href="#" class="btn small-btn primary process-individual-btn"
+                                       data-user-id="@staff.Id"
+                                       data-pay-period-id="@Model.PayPeriod.Id">
+                                        Process
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

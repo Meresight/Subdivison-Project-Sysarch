@@ -1,0 +1,149 @@
+﻿@using GreenMeadowsPortal.ViewModels
+<!-- Views/Payroll/Index.cshtml -->
+@model PayrollViewModel
+@{
+    ViewData["Title"] = "Payroll Management - Green Meadows Portal";
+    Layout = "_AdminLayout";
+}
+
+<div class="page-header">
+    <h1>Payroll Management</h1>
+    <div>
+        <a asp-action="CreatePayPeriod" class="btn primary-btn">
+            <i class="fas fa-plus"></i> Create Pay Period
+        </a>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Pay Periods</h2>
+    </div>
+
+    @if (!Model.PayPeriods.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <h3>No Pay Periods</h3>
+            <p>No pay periods have been created yet.</p>
+            <a asp-action="CreatePayPeriod" class="btn primary-btn mt-3">
+                <i class="fas fa-plus"></i> Create Pay Period
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="payroll-table-section">
+            <table class="payroll-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var period in Model.PayPeriods)
+                    {
+                        <tr>
+                            <td>
+                                Pay Period #@period.Id
+                            </td>
+                            <td>@period.StartDate.ToString("MMM dd, yyyy")</td>
+                            <td>@period.EndDate.ToString("MMM dd, yyyy")</td>
+                            <td><span class="status @period.Status.ToLower()">@period.Status</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="PayPeriodDetails" asp-route-id="@period.Id" class="btn small-btn">View</a>
+                                    @if (period.Status == "Open")
+                                    {
+                                        <form asp-action="ProcessPayroll" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="payPeriodId" value="@period.Id" />
+                                            <button type="submit" class="btn small-btn primary">Process</button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Payroll Overview</h2>
+    </div>
+
+    <div class="analytics-grid">
+        <div class="analytics-card">
+            <h3>Total Staff</h3>
+            <div class="analytics-value">
+                <i class="fas fa-users"></i>
+                <span class="value">@Model.PayPeriods.SelectMany(p => p.EmployeePayments).Select(p => p.UserId).Distinct().Count()</span>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Current Month Payments</h3>
+            <div class="analytics-value">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="value">
+                    ₱@Model.PayPeriods
+                    .Where(p => p.StartDate.Month == DateTime.Now.Month && p.StartDate.Year == DateTime.Now.Year)
+                    .SelectMany(p => p.EmployeePayments)
+                    .Sum(p => p.NetPay).ToString("N2")
+                </span>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Year to Date Payments</h3>
+            <div class="analytics-value">
+                <i class="fas fa-calendar-check"></i>
+                <span class="value">
+                    ₱@Model.PayPeriods
+                    .Where(p => p.StartDate.Year == DateTime.Now.Year)
+                    .SelectMany(p => p.EmployeePayments)
+                    .Sum(p => p.NetPay).ToString("N2")
+                </span>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Pending Approval</h3>
+            <div class="analytics-value">
+                <i class="fas fa-clock"></i>
+                <span class="value">
+                    @Model.PayPeriods
+                    .SelectMany(p => p.EmployeePayments)
+                    .Count(p => p.Status == "Pending")
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

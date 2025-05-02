@@ -1,0 +1,158 @@
+﻿<!-- Views/FaceRecognition/TimeTracking.cshtml -->
+@model dynamic
+@{
+    ViewData["Title"] = "Time Tracking - Green Meadows Portal";
+    Layout = "_DashboardLayout";
+}
+
+<div class="content-section">
+    <div class="section-header">
+        <h2>Facial Recognition Time Tracking</h2>
+    </div>
+
+    <div class="time-tracking-container">
+        <div class="time-tracking-instructions">
+            <p>Use facial recognition to check in or check out:</p>
+            <ol>
+                <li>Make sure you are in a well-lit area</li>
+                <li>Look directly at the camera</li>
+                <li>Choose Check In or Check Out</li>
+                <li>Take a photo or upload an image</li>
+            </ol>
+        </div>
+
+        <div class="time-tracking-capture">
+            <div class="video-container">
+                <video id="video" width="400" height="300" autoplay></video>
+                <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+            </div>
+            <div class="capture-controls">
+                <button id="capture-btn" class="btn primary-btn">Capture Photo</button>
+            </div>
+        </div>
+
+        <div class="preview-container" style="display:none;">
+            <h3>Preview</h3>
+            <img id="preview" src="" alt="Face preview">
+            <div class="preview-actions">
+                <button id="retake-btn" class="btn secondary-btn">Retake</button>
+                <div class="action-buttons">
+                    <form id="check-in-form" asp-action="CheckIn" method="post" enctype="multipart/form-data">
+                        <input type="file" id="checkInImage" name="faceImage" style="display:none;">
+                        <button id="check-in-btn" type="submit" class="btn success-btn">Check In</button>
+                    </form>
+                    <form id="check-out-form" asp-action="CheckOut" method="post" enctype="multipart/form-data">
+                        <input type="file" id="checkOutImage" name="faceImage" style="display:none;">
+                        <button id="check-out-btn" type="submit" class="btn danger-btn">Check Out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-upload">
+            <h3>Or Upload Image</h3>
+            <div class="upload-options">
+                <form asp-action="CheckIn" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="uploadCheckInImage" class="form-label">Upload for Check In</label>
+                        <input type="file" id="uploadCheckInImage" name="faceImage" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn success-btn">Check In</button>
+                    </div>
+                </form>
+
+                <form asp-action="CheckOut" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="uploadCheckOutImage" class="form-label">Upload for Check Out</label>
+                        <input type="file" id="uploadCheckOutImage" name="faceImage" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn danger-btn">Check Out</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const captureBtn = document.getElementById('capture-btn');
+            const previewContainer = document.querySelector('.preview-container');
+            const previewImg = document.getElementById('preview');
+            const retakeBtn = document.getElementById('retake-btn');
+            const checkInBtn = document.getElementById('check-in-btn');
+            const checkOutBtn = document.getElementById('check-out-btn');
+            const checkInImage = document.getElementById('checkInImage');
+            const checkOutImage = document.getElementById('checkOutImage');
+
+            // Get access to the camera
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                    })
+                    .catch(function(error) {
+                        console.error("Camera error: ", error);
+                    });
+            }
+
+            // Capture photo
+            captureBtn.addEventListener('click', function() {
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, 400, 300);
+
+                const imageDataUrl = canvas.toDataURL('image/jpeg');
+                previewImg.src = imageDataUrl;
+
+                // Show preview container, hide video
+                previewContainer.style.display = 'block';
+                document.querySelector('.video-container').style.display = 'none';
+                document.querySelector('.capture-controls').style.display = 'none';
+            });
+
+            // Retake photo
+            retakeBtn.addEventListener('click', function() {
+                previewContainer.style.display = 'none';
+                document.querySelector('.video-container').style.display = 'block';
+                document.querySelector('.capture-controls').style.display = 'block';
+            });
+
+            // Process captured image for check in/out
+            function processImage(inputElement, formId) {
+                fetch(previewImg.src)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        // Create a File object
+                        const file = new File([blob], "face.jpg", { type: "image/jpeg" });
+
+                        // Create a FileList-like object
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+
+                        // Assign to the file input
+                        inputElement.files = dataTransfer.files;
+
+                        // Submit the form
+                        document.getElementById(formId).submit();
+                    });
+            }
+
+            // Check In
+            checkInBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                processImage(checkInImage, 'check-in-form');
+            });
+
+            // Check Out
+            checkOutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                processImage(checkOutImage, 'check-out-form');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Direct User Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h1>User Management (Direct)</h1>
+
+    <p>Hello, @ViewBag.CurrentUser.FirstName! This is a direct user listing that bypasses the regular user management system.</p>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>All Users (@ViewBag.Users.Count)</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in ViewBag.Users)
+                    {
+                        <tr>
+                            <td>@user.Email</td>
+                            <td>@user.FullName</td>
+                            <td>@user.Role</td>
+                            <td>@user.Status</td>
+                            <td>@user.RegisteredDate</td>
+                            <td>@user.LastLogin</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
