@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 
 
-[Authorize]
+[Authorize(Roles = "Admin,Staff")]
 public class FaceRecognitionController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -33,8 +33,18 @@ public class FaceRecognitionController : Controller
     }
 
     [HttpGet]
-    public IActionResult Enroll()
+    public async Task<IActionResult> Enroll()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return RedirectToAction("Login", "Account");
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains("Admin") && !roles.Contains("Staff"))
+        {
+            return Forbid();
+        }
+
         return View();
     }
 

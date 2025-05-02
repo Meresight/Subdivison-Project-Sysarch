@@ -1,82 +1,208 @@
-﻿<!-- Views/FaceRecognition/TimeTracking.cshtml -->
-@model dynamic
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Time Tracking - Green Meadows Portal";
-    Layout = "_DashboardLayout";
+    Layout = null;
 }
 
-<div class="content-section">
-    <div class="section-header">
-        <h2>Facial Recognition Time Tracking</h2>
-    </div>
-
-    <div class="time-tracking-container">
-        <div class="time-tracking-instructions">
-            <p>Use facial recognition to check in or check out:</p>
-            <ol>
-                <li>Make sure you are in a well-lit area</li>
-                <li>Look directly at the camera</li>
-                <li>Choose Check In or Check Out</li>
-                <li>Take a photo or upload an image</li>
-            </ol>
-        </div>
-
-        <div class="time-tracking-capture">
-            <div class="video-container">
-                <video id="video" width="400" height="300" autoplay></video>
-                <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Meadows | Time Tracking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/admin.css">
+    <link rel="stylesheet" href="~/css/staff.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Green Meadows</h3>
+                <div class="sidebar-logo">GM</div>
             </div>
-            <div class="capture-controls">
-                <button id="capture-btn" class="btn primary-btn">Capture Photo</button>
-            </div>
-        </div>
 
-        <div class="preview-container" style="display:none;">
-            <h3>Preview</h3>
-            <img id="preview" src="" alt="Face preview">
-            <div class="preview-actions">
-                <button id="retake-btn" class="btn secondary-btn">Retake</button>
-                <div class="action-buttons">
-                    <form id="check-in-form" asp-action="CheckIn" method="post" enctype="multipart/form-data">
-                        <input type="file" id="checkInImage" name="faceImage" style="display:none;">
-                        <button id="check-in-btn" type="submit" class="btn success-btn">Check In</button>
-                    </form>
-                    <form id="check-out-form" asp-action="CheckOut" method="post" enctype="multipart/form-data">
-                        <input type="file" id="checkOutImage" name="faceImage" style="display:none;">
-                        <button id="check-out-btn" type="submit" class="btn danger-btn">Check Out</button>
-                    </form>
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img src="/images/default-avatar.png" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                    <h4>Staff User</h4>
+                    <p>Staff</p>
                 </div>
             </div>
-        </div>
 
-        <div class="manual-upload">
-            <h3>Or Upload Image</h3>
-            <div class="upload-options">
-                <form asp-action="CheckIn" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="uploadCheckInImage" class="form-label">Upload for Check In</label>
-                        <input type="file" id="uploadCheckInImage" name="faceImage" class="form-control" accept="image/*">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn success-btn">Check In</button>
-                    </div>
-                </form>
+            <ul class="sidebar-menu">
+                <li>
+                    <a asp-controller="Dashboard" asp-action="StaffDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <li>
+                    <a asp-controller="Announcement" asp-action="Index"><i class="fas fa-bullhorn"></i> Announcements</a>
+                </li>
+                <li class="active">
+                    <a href="/FaceRecognition/TimeTracking"><i class="fas fa-clock"></i> Time Tracking</a>
+                </li>
+                <li>
+                    <a href="/FaceRecognition/Enroll"><i class="fas fa-user-plus"></i> Face Enrollment</a>
+                </li>
+                <li>
+                    <a href="/ServiceRequests"><i class="fas fa-tools"></i> Service Requests</a>
+                </li>
+                <li>
+                    <a href="/Facilities"><i class="fas fa-swimming-pool"></i> Facilities</a>
+                </li>
+                <li>
+                    <a href="/Documents"><i class="fas fa-file-alt"></i> Documents</a>
+                </li>
+                <li>
+                    <a href="/Forum"><i class="fas fa-comments"></i> Community Forum</a>
+                </li>
+                <li>
+                    <a href="/Events"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li>
+                    <a href="/Reports"><i class="fas fa-chart-bar"></i> Reports</a>
+                </li>
+                <li>
+                    <a href="/Polls"><i class="fas fa-poll"></i> Polls & Surveys</a>
+                </li>
+                <li>
+                    <a href="/Settings"><i class="fas fa-cog"></i> Settings</a>
+                </li>
+            </ul>
 
-                <form asp-action="CheckOut" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="uploadCheckOutImage" class="form-label">Upload for Check Out</label>
-                        <input type="file" id="uploadCheckOutImage" name="faceImage" class="form-control" accept="image/*">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn danger-btn">Check Out</button>
-                    </div>
-                </form>
+            <div class="sidebar-footer">
+                <a asp-controller="Account" asp-action="Profile"><i class="fas fa-user-cog"></i> Profile</a>
+                <a asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
             </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="content-area">
+            <!-- Top Navigation -->
+            <header class="top-navbar">
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="greeting">
+                    <h2>Time Tracking</h2>
+                </div>
+
+                <div class="navbar-right">
+                    <div class="notification-bell">
+                        <a asp-controller="Notification" asp-action="Index">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">0</span>
+                        </a>
+                    </div>
+
+                    <div class="user-dropdown">
+                        <img src="/images/default-avatar.png" alt="Staff Avatar">
+                        <span>Staff User</span>
+                        <i class="fas fa-chevron-down"></i>
+
+                        <div class="dropdown-menu">
+                            <a asp-controller="Account" asp-action="Profile"><i class="fas fa-user"></i> My Profile</a>
+                            <a href="/Settings"><i class="fas fa-cog"></i> Settings</a>
+                            <a asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="main-content">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2>Facial Recognition Time Tracking</h2>
+                    </div>
+
+                    <div class="time-tracking-container">
+                        <div class="time-tracking-instructions">
+                            <p>Use facial recognition to check in or check out:</p>
+                            <ol>
+                                <li>Make sure you are in a well-lit area</li>
+                                <li>Look directly at the camera</li>
+                                <li>Choose Check In or Check Out</li>
+                                <li>Take a photo or upload an image</li>
+                            </ol>
+                        </div>
+
+                        <div class="time-tracking-capture">
+                            <div class="video-container">
+                                <video id="video" width="400" height="300" autoplay></video>
+                                <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+                            </div>
+                            <div class="capture-controls">
+                                <button id="capture-btn" class="btn primary-btn">Capture Photo</button>
+                            </div>
+                        </div>
+
+                        <div class="preview-container" style="display:none;">
+                            <h3>Preview</h3>
+                            <img id="preview" src="" alt="Face preview">
+                            <div class="preview-actions">
+                                <button id="retake-btn" class="btn secondary-btn">Retake</button>
+                                <div class="action-buttons">
+                                    <form id="check-in-form" asp-action="CheckIn" method="post" enctype="multipart/form-data">
+                                        <input type="file" id="checkInImage" name="faceImage" style="display:none;">
+                                        <button id="check-in-btn" type="submit" class="btn success-btn">Check In</button>
+                                    </form>
+                                    <form id="check-out-form" asp-action="CheckOut" method="post" enctype="multipart/form-data">
+                                        <input type="file" id="checkOutImage" name="faceImage" style="display:none;">
+                                        <button id="check-out-btn" type="submit" class="btn danger-btn">Check Out</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="manual-upload">
+                            <h3>Or Upload Image</h3>
+                            <div class="upload-options">
+                                <form asp-action="CheckIn" method="post" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <label for="uploadCheckInImage" class="form-label">Upload for Check In</label>
+                                        <input type="file" id="uploadCheckInImage" name="faceImage" class="form-control" accept="image/*">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn success-btn">Check In</button>
+                                    </div>
+                                </form>
+
+                                <form asp-action="CheckOut" method="post" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <label for="uploadCheckOutImage" class="form-label">Upload for Check Out</label>
+                                        <input type="file" id="uploadCheckOutImage" name="faceImage" class="form-control" accept="image/*">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn danger-btn">Check Out</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="main-footer">
+                <div class="footer-content">
+                    <p>&copy; @DateTime.Now.Year Green Meadows Subdivision. All rights reserved.</p>
+                    <div class="footer-links">
+                        <a href="/Help">Help Center</a>
+                        <a href="/Privacy">Privacy Policy</a>
+                        <a href="/Terms">Terms of Service</a>
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
-</div>
 
-@section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('video');
@@ -98,6 +224,7 @@
                     })
                     .catch(function(error) {
                         console.error("Camera error: ", error);
+                        alert("Could not access camera. Please make sure you have a camera enabled and have given permission.");
                     });
             }
 
@@ -124,22 +251,31 @@
 
             // Process captured image for check in/out
             function processImage(inputElement, formId) {
-                fetch(previewImg.src)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        // Create a File object
-                        const file = new File([blob], "face.jpg", { type: "image/jpeg" });
+                try {
+                    fetch(previewImg.src)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            // Create a File object
+                            const file = new File([blob], "face.jpg", { type: "image/jpeg" });
 
-                        // Create a FileList-like object
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
+                            // Create a FileList-like object
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
 
-                        // Assign to the file input
-                        inputElement.files = dataTransfer.files;
+                            // Assign to the file input
+                            inputElement.files = dataTransfer.files;
 
-                        // Submit the form
-                        document.getElementById(formId).submit();
-                    });
+                            // Submit the form
+                            document.getElementById(formId).submit();
+                        })
+                        .catch(err => {
+                            console.error("Error processing image:", err);
+                            alert("Error processing image. Please try again.");
+                        });
+                } catch (err) {
+                    console.error("Error in processImage function:", err);
+                    alert("Error processing image. Please try again or use the upload option instead.");
+                }
             }
 
             // Check In
@@ -153,6 +289,36 @@
                 e.preventDefault();
                 processImage(checkOutImage, 'check-out-form');
             });
+
+            // User dropdown toggle
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown) {
+                userDropdown.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    this.classList.toggle('open');
+                    const dropdownMenu = this.querySelector('.dropdown-menu');
+                    dropdownMenu.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!userDropdown.contains(event.target)) {
+                        userDropdown.classList.remove('open');
+                        const dropdownMenu = userDropdown.querySelector('.dropdown-menu');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+
+            // Mobile sidebar toggle
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            }
         });
     </script>
-}
+</body>
+</html>
