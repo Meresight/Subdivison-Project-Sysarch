@@ -1,169 +1,73 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"] - Green Meadows Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/admin.css">
-</head>
-<body>
-    <div class="wrapper">
-        <!-- Admin Sidebar Navigation -->
-        <nav id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3>Green Meadows</h3>
-                <div class="sidebar-logo">GM</div>
-            </div>
+﻿@using GreenMeadowsPortal.ViewModels
+@model CreatePayPeriodViewModel
+@{
+    ViewData["Title"] = "Create Pay Period - Green Meadows Portal";
+    Layout = "_AdminLayout";
+}
 
-            <div class="user-profile">
-                <div class="user-avatar">
-                    <img src="/images/default-avatar.png" alt="Admin Avatar">
-                </div>
-                <div class="user-info">
-                    <h4>Admin User</h4>
-                    <p>Admin</p>
-                </div>
-            </div>
+<!-- Page Content -->
+<div class="page-header">
+    <h1>Create Pay Period</h1>
+    <nav class="breadcrumb">
+        <a asp-controller="Dashboard" asp-action="AdminDashboard">Admin</a> /
+        <a asp-controller="Payroll" asp-action="Index">Payroll</a> /
+        Create Pay Period
+    </nav>
+</div>
 
-            <ul class="sidebar-menu">
-                <li>
-                    <a asp-controller="Dashboard" asp-action="AdminDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                </li>
-                <li>
-                    <a asp-controller="Dashboard" asp-action="UserManagement"><i class="fas fa-users"></i> User Management</a>
-                </li>
-                <li>
-                    <a asp-controller="Announcement" asp-action="Index"><i class="fas fa-bullhorn"></i> Announcements</a>
-                </li>
-                <li>
-                    <a asp-controller="Dashboard" asp-action="Billing"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
-                </li>
-                <li>
-                    <a href="/FaceRecognition/TimeTracking"><i class="fas fa-clock"></i> Time Tracking</a>
-                </li>
-                <li>
-                    <a href="/FaceRecognition/Enroll"><i class="fas fa-user-plus"></i> Face Enrollment</a>
-                </li>
-                <li class="active">
-                    <a href="/Payroll"><i class="fas fa-file-invoice-dollar"></i> Payroll</a>
-                </li>
-                <!-- More menu items -->
-            </ul>
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
 
-            <div class="sidebar-footer">
-                <a asp-controller="Account" asp-action="Profile"><i class="fas fa-user-cog"></i> Profile</a>
-                <a asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
-            </div>
-        </nav>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        <button class="close-alert"><i class="fas fa-times"></i></button>
+    </div>
+}
 
-        <!-- Main Content -->
-        <div class="content-area">
-            <!-- Top Navigation -->
-            <header class="top-navbar">
-                <button id="sidebar-toggle" class="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-
-                <div class="search-bar">
-                    <input type="text" placeholder="Search...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-
-                <div class="navbar-right">
-                    <div class="notification-bell">
-                        <a asp-controller="Notification" asp-action="Index">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-count">0</span>
-                        </a>
-                    </div>
-
-                    <div class="user-dropdown">
-                        <img src="/images/default-avatar.png" alt="Admin Avatar">
-                        <span>Admin</span>
-                        <i class="fas fa-chevron-down"></i>
-
-                        <div class="dropdown-menu">
-                            <a asp-controller="Account" asp-action="Profile"><i class="fas fa-user-cog"></i> My Profile</a>
-                            <a href="/Settings"><i class="fas fa-cog"></i> Settings</a>
-                            <a asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt"></i>Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <main class="main-content">
-                @RenderBody()
-            </main>
-
-            <!-- Footer -->
-            <footer class="main-footer">
-                <div class="footer-content">
-                    <p>&copy; @DateTime.Now.Year Green Meadows Subdivision. All rights reserved.</p>
-                    <div class="footer-links">
-                        <a href="/Help">Help Center</a>
-                        <a href="/Privacy">Privacy Policy</a>
-                        <a href="/Terms">Terms of Service</a>
-                    </div>
-                </div>
-            </footer>
-        </div>
+<div class="content-section">
+    <div class="section-header">
+        <h2>Pay Period Details</h2>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // User dropdown toggle
-            const userDropdown = document.querySelector('.user-dropdown');
-            if (userDropdown) {
-                userDropdown.addEventListener('click', function(event) {
-                    event.stopPropagation();
-                    this.classList.toggle('open');
-                    const dropdownMenu = this.querySelector('.dropdown-menu');
-                    dropdownMenu.classList.toggle('show');
-                });
+    <form asp-controller="Payroll" asp-action="CreatePayPeriod" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    if (!userDropdown.contains(event.target)) {
-                        userDropdown.classList.remove('open');
-                        const dropdownMenu = userDropdown.querySelector('.dropdown-menu');
-                        if (dropdownMenu) dropdownMenu.classList.remove('show');
-                    }
-                });
-            }
+        <div class="form-group">
+            <label asp-for="StartDate" class="form-label">Start Date</label>
+            <input asp-for="StartDate" class="form-control" type="date" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
 
-            // Mobile sidebar toggle
-            const sidebarToggle = document.getElementById('sidebar-toggle');
-            const sidebar = document.getElementById('sidebar');
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                });
-            }
+        <div class="form-group">
+            <label asp-for="EndDate" class="form-label">End Date</label>
+            <input asp-for="EndDate" class="form-control" type="date" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
 
-            // Close alert buttons
-            const closeButtons = document.querySelectorAll('.close-alert');
-            closeButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var alert = this.parentElement;
-                    alert.style.display = 'none';
-                });
-            });
+        <div class="form-group">
+            <label asp-for="Notes" class="form-label">Notes (Optional)</label>
+            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any relevant notes about this pay period"></textarea>
+            <span asp-validation-for="Notes" class="text-danger"></span>
+        </div>
 
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                    alert.style.display = 'none';
-                });
-            }, 5000);
-        });
-    </script>
-    @RenderSection("Scripts", required: false)
-</body>
-</html>
+        <div class="form-actions">
+            <a asp-action="Index" class="btn secondary-btn">Cancel</a>
+            <button type="submit" class="btn primary-btn">Create Pay Period</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}
