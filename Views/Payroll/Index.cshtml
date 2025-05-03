@@ -130,7 +130,7 @@
                 <div class="page-header">
                     <h1>Payroll Management</h1>
                     <div>
-                        <a href="/Payroll/CreatePayPeriod" class="btn primary-btn mt-3">
+                        <a href="/Payroll/CreatePayPeriod" class="btn primary-btn">
                             <i class="fas fa-plus"></i> Create Pay Period
                         </a>
                     </div>
@@ -174,7 +174,7 @@
                             </div>
                             <h3>No Pay Periods</h3>
                             <p>No pay periods have been created yet.</p>
-                            <a href="/Payroll/CreatePayPeriod" class="btn primary-btn mt-3">   
+                            <a href="/Payroll/CreatePayPeriod" class="btn primary-btn mt-3">
                                 <i class="fas fa-plus"></i> Create Pay Period
                             </a>
                         </div>
@@ -204,10 +204,10 @@
                                             <td><span class="status @period.Status.ToLower()">@period.Status</span></td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <a asp-action="PayPeriodDetails" asp-route-id="@period.Id" class="btn small-btn">View</a>
+                                                    <a asp-controller="Payroll" asp-action="PayPeriodDetails" asp-route-id="@period.Id" class="btn small-btn">View</a>
                                                     @if (period.Status == "Open")
                                                     {
-                                                        <form asp-action="ProcessPayroll" method="post" class="d-inline">
+                                                        <form asp-controller="Payroll" asp-action="ProcessPayroll" method="post" class="d-inline">
                                                             @Html.AntiForgeryToken()
                                                             <input type="hidden" name="payPeriodId" value="@period.Id" />
                                                             <button type="submit" class="btn small-btn primary">Process</button>
@@ -283,11 +283,12 @@
                         <h2>Quick Actions</h2>
                     </div>
 
-                    <a href="/Payroll/CreatePayPeriod" class="quick-action-card">
-                        <div class="quick-action-icon"><i class="fas fa-calendar-plus"></i></div>
-                        <h4>Create Pay Period</h4>
-                        <p>Set up a new pay period for processing</p>
-                    </a>
+                    <div class="quick-actions">
+                        <a href="/Payroll/CreatePayPeriod" class="quick-action-card">
+                            <div class="quick-action-icon"><i class="fas fa-calendar-plus"></i></div>
+                            <h4>Create Pay Period</h4>
+                            <p>Set up a new pay period for processing</p>
+                        </a>
 
                         <a href="/Reports/PayrollSummary" class="quick-action-card">
                             <div class="quick-action-icon"><i class="fas fa-chart-pie"></i></div>

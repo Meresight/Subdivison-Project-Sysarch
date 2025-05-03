@@ -65,15 +65,26 @@ namespace GreenMeadowsPortal.Services
 
         public async Task<TimeRecord> CheckOutAsync(string userId, string method, string location)
         {
-            // Find the user's open time record
-            var openRecord = await _context.TimeRecords
+            // Find all user's open time records (in case there are multiple)
+            var openRecords = await _context.TimeRecords
                 .Where(tr => tr.UserId == userId && !tr.CheckOutTime.HasValue)
-                .FirstOrDefaultAsync();
+                .OrderBy(tr => tr.CheckInTime)
+                .ToListAsync();
 
-            if (openRecord == null)
+            if (!openRecords.Any())
             {
                 _logger.LogWarning("User {UserId} has no open time record to check out from", userId);
                 throw new InvalidOperationException("No open time record found for check-out");
+            }
+
+            // If there are multiple open records, close the oldest one first
+            var openRecord = openRecords.First();
+
+            // Log if there are multiple open records (this is an unusual situation)
+            if (openRecords.Count > 1)
+            {
+                _logger.LogWarning("User {UserId} has {Count} open time records. Checking out the oldest one.",
+                    userId, openRecords.Count);
             }
 
             // Update with check-out info
@@ -86,7 +97,6 @@ namespace GreenMeadowsPortal.Services
             _logger.LogInformation("User {UserId} checked out at {Time}", userId, openRecord.CheckOutTime);
             return openRecord;
         }
-
         // Get total work time for a pay period
         public async Task<decimal> GetTotalHoursAsync(string userId, DateTime startDate, DateTime endDate)
         {

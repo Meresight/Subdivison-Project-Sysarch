@@ -192,8 +192,6 @@ public class FaceRecognitionController : Controller
                 var (success, userId) = await _faceService.IdentifyFaceAsync(memoryStream.ToArray());
                 _logger.LogInformation("Face recognition result: {Success}, User ID: {UserId}", success, userId);
 
-
-
                 if (success)
                 {
                     // Get user's IP address or location
