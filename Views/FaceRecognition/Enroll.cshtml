@@ -116,6 +116,20 @@
             </header>
 
             <!-- Page Content -->
+            <div class="enrollment-status" style="margin-bottom: 20px;">
+                @if (ViewBag.IsEnrolled ?? false)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Your face is already enrolled in the system.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Your face is not enrolled. Please enroll to use face recognition.
+                    </div>
+                }
+            </div>
             <main class="main-content">
                 <div class="content-section">
                     <div class="section-header">

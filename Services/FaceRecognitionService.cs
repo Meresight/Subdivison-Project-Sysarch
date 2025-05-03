@@ -21,28 +21,58 @@ public class FaceRecognitionService
         // Initialize your face recognition client
     }
 
+    public async Task<bool> IsUserEnrolledAsync(string userId)
+    {
+        try
+        {
+            return await _context.FaceEnrollments
+                .AnyAsync(e => e.UserId == userId && e.IsActive);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if user is enrolled");
+            return false;
+        }
+    }
     public async Task<bool> EnrollUserFaceAsync(string userId, byte[] faceImageData)
     {
         try
         {
-            // This would call your facial recognition API to process the image
-            // and extract facial features
+            // Check if user is already enrolled
+            var existingEnrollment = await _context.FaceEnrollments
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.IsActive);
+
+            if (existingEnrollment != null)
+            {
+                _logger.LogInformation("User {UserId} already has an active face enrollment", userId);
+                return false; // User already enrolled
+            }
+
+            // Process the face image to extract features
             var faceFeatures = await ProcessFaceImage(faceImageData);
 
-            // Store the enrollment
+            // Get the user from the database
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User with ID {userId} not found.");
+            }
+
+            // Create a new face enrollment
             var enrollment = new FaceEnrollment
             {
                 UserId = userId,
-                User = await _context.Users.FindAsync(userId)
-           ?? throw new InvalidOperationException($"User with ID {userId} not found."),
+                User = user,
                 FaceDataJson = JsonSerializer.Serialize(faceFeatures),
                 EnrollmentDate = DateTime.Now,
                 IsActive = true
             };
 
-
+            // Add to database and save
             _context.FaceEnrollments.Add(enrollment);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Successfully enrolled face for user {UserId}", userId);
             return true;
         }
         catch (Exception ex)

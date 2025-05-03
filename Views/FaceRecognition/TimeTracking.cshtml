@@ -116,6 +116,28 @@
             </header>
 
             <!-- Page Content -->
+            <!-- Add this at the beginning of your time tracking form -->
+            <div class="time-tracking-status" style="margin-bottom: 20px;">
+                @if (!(ViewBag.IsEnrolled ?? false))
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> You are not enrolled for face recognition. Please enroll first.
+                        <a href="/FaceRecognition/Enroll" class="btn primary-btn ml-2">Enroll Now</a>
+                    </div>
+                }
+                else if (ViewBag.HasOpenRecord ?? false)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-clock"></i> You have an open time record. Please check out first.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> You're enrolled and can check in.
+                    </div>
+                }
+            </div>
             <main class="main-content">
                 <div class="content-section">
                     <div class="section-header">
@@ -204,6 +226,23 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix: Convert C# boolean to JavaScript boolean
+            var isEnrolled = @Json.Serialize(ViewBag.IsEnrolled ?? false);
+            var hasOpenRecord = @Json.Serialize(ViewBag.HasOpenRecord ?? false);
+
+            var checkInBtn = document.getElementById('check-in-btn');
+            var checkOutBtn = document.getElementById('check-out-btn');
+
+            if (!isEnrolled) {
+                if (checkInBtn) checkInBtn.disabled = true;
+                if (checkOutBtn) checkOutBtn.disabled = true;
+            } else if (!hasOpenRecord) {
+                if (checkOutBtn) checkOutBtn.disabled = true;
+            } else {
+                if (checkInBtn) checkInBtn.disabled = true;
+            }
+        });
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');

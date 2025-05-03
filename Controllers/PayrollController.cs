@@ -75,7 +75,28 @@ namespace GreenMeadowsPortal.Controllers
 
             return View(model);
         }
+        [HttpGet]
+        [Route("PayPeriodDetails/{id}")]
+        public async Task<IActionResult> PayPeriodDetails(int id)
+        {
+            var payPeriod = await _context.PayPeriods
+                .Include(p => p.EmployeePayments)
+                .ThenInclude(ep => ep.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
+            if (payPeriod == null)
+            {
+                return NotFound();
+            }
+
+            var model = new PayPeriodDetailsViewModel
+            {
+                PayPeriod = payPeriod,
+                StaffMembers = await _userManager.GetUsersInRoleAsync("Staff")
+            };
+
+            return View(model);
+        }
         [HttpPost]
         [Route("CreatePayPeriod")]
         [ValidateAntiForgeryToken]

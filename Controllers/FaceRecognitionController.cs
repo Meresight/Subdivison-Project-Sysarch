@@ -20,19 +20,25 @@ public class FaceRecognitionController : Controller
     private readonly TimeTrackingService _timeService;
     private readonly ILogger<FaceRecognitionController> _logger;
     private readonly IWebHostEnvironment _hostEnvironment;
+    private readonly AppDbContext _context;
+
 
     public FaceRecognitionController(
         UserManager<ApplicationUser> userManager,
         FaceRecognitionService faceService,
         TimeTrackingService timeService,
         ILogger<FaceRecognitionController> logger,
-        IWebHostEnvironment hostEnvironment)
+        IWebHostEnvironment hostEnvironment,
+            AppDbContext context) // Add AppDbContext to the constructor
+
     {
         _userManager = userManager;
         _faceService = faceService;
         _timeService = timeService;
         _logger = logger;
         _hostEnvironment = hostEnvironment;
+        _context = context; // Assign the context
+
     }
 
     [HttpGet]
@@ -42,14 +48,13 @@ public class FaceRecognitionController : Controller
         if (user == null)
             return RedirectToAction("Login", "Account");
 
-        var roles = await _userManager.GetRolesAsync(user);
-        if (!roles.Contains("Admin") && !roles.Contains("Staff"))
-        {
-            return Forbid();
-        }
+        // Check if user is already enrolled
+        var isEnrolled = await _faceService.IsUserEnrolledAsync(user.Id);
+        ViewBag.IsEnrolled = isEnrolled;
 
         return View();
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Enroll(IFormFile faceImage)
@@ -92,8 +97,22 @@ public class FaceRecognitionController : Controller
     }
 
     [HttpGet]
-    public IActionResult TimeTracking()
+    public async Task<IActionResult> TimeTracking()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return RedirectToAction("Login", "Account");
+
+        // Check if user is enrolled
+        var isEnrolled = await _faceService.IsUserEnrolledAsync(user.Id);
+
+        // Check if user has an open time record
+        var openRecord = await _context.TimeRecords
+            .FirstOrDefaultAsync(tr => tr.UserId == user.Id && tr.CheckOutTime == null);
+
+        ViewBag.IsEnrolled = isEnrolled;
+        ViewBag.HasOpenRecord = openRecord != null;
+
         return View();
     }
 

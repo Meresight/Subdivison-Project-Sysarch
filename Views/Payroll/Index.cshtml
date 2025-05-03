@@ -130,7 +130,7 @@
                 <div class="page-header">
                     <h1>Payroll Management</h1>
                     <div>
-                        <a asp-action="CreatePayPeriod" class="btn primary-btn">
+                        <a href="/Payroll/CreatePayPeriod" class="btn primary-btn mt-3">
                             <i class="fas fa-plus"></i> Create Pay Period
                         </a>
                     </div>
@@ -174,7 +174,7 @@
                             </div>
                             <h3>No Pay Periods</h3>
                             <p>No pay periods have been created yet.</p>
-                            <a asp-action="CreatePayPeriod" class="btn primary-btn mt-3">
+                            <a href="/Payroll/CreatePayPeriod" class="btn primary-btn mt-3">   
                                 <i class="fas fa-plus"></i> Create Pay Period
                             </a>
                         </div>
@@ -283,12 +283,11 @@
                         <h2>Quick Actions</h2>
                     </div>
 
-                    <div class="quick-actions">
-                        <a asp-action="CreatePayPeriod" class="quick-action-card">
-                            <div class="quick-action-icon"><i class="fas fa-calendar-plus"></i></div>
-                            <h4>Create Pay Period</h4>
-                            <p>Set up a new pay period for processing</p>
-                        </a>
+                    <a href="/Payroll/CreatePayPeriod" class="quick-action-card">
+                        <div class="quick-action-icon"><i class="fas fa-calendar-plus"></i></div>
+                        <h4>Create Pay Period</h4>
+                        <p>Set up a new pay period for processing</p>
+                    </a>
 
                         <a href="/Reports/PayrollSummary" class="quick-action-card">
                             <div class="quick-action-icon"><i class="fas fa-chart-pie"></i></div>
@@ -327,6 +326,34 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Payroll Index JS Loaded');
+
+            // Add click handlers to quick action cards
+            const quickActionCards = document.querySelectorAll('.quick-action-card');
+
+            quickActionCards.forEach(function(card, index) {
+                console.log(`Setting up card ${index}`, card);
+
+                card.addEventListener('click', function(e) {
+                    console.log('Quick action clicked', this);
+
+                    // Check if it's an <a> tag or a div
+                    if (this.tagName === 'A') {
+                        // Let the default action happen for links
+                        console.log('Navigating to:', this.href);
+                    } else {
+                        // Handle div clicks manually
+                        const href = this.getAttribute('data-href');
+                        if (href) {
+                            window.location.href = href;
+                        }
+                    }
+                });
+
+                // Add visual feedback
+                card.style.cursor = 'pointer';
+            });
+
             // User dropdown toggle
             const userDropdown = document.querySelector('.user-dropdown');
             if (userDropdown) {
@@ -337,7 +364,6 @@
                     dropdownMenu.classList.toggle('show');
                 });
 
-                // Close dropdown when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!userDropdown.contains(event.target)) {
                         userDropdown.classList.remove('open');
