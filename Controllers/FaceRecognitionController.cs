@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GreenMeadowsPortal.Services; // Add this for TimeTrackingService and PayrollService
+
+
 
 
 
@@ -97,6 +100,11 @@ public class FaceRecognitionController : Controller
     [HttpPost]
     public async Task<IActionResult> CheckIn(IFormFile faceImage)
     {
+
+        _logger.LogInformation("Attempting check-in for user with image of size: {Size}",
+       faceImage?.Length ?? 0);
+        _logger.LogInformation("Face recognition check-in process started for user");
+
         if (faceImage == null || faceImage.Length == 0)
         {
             TempData["ErrorMessage"] = "Please provide a face image for check-in.";
@@ -109,6 +117,7 @@ public class FaceRecognitionController : Controller
             {
                 await faceImage.CopyToAsync(memoryStream);
                 var (success, userId) = await _faceService.IdentifyFaceAsync(memoryStream.ToArray());
+                _logger.LogInformation("Face recognition result: {Success}, User ID: {UserId}", success, userId);
 
                 if (success)
                 {
@@ -146,6 +155,10 @@ public class FaceRecognitionController : Controller
     [HttpPost]
     public async Task<IActionResult> CheckOut(IFormFile faceImage)
     {
+        _logger.LogInformation("Attempting check-in for user with image of size: {Size}",
+       faceImage?.Length ?? 0);
+        _logger.LogInformation("Face recognition check-in process started for user");
+
         if (faceImage == null || faceImage.Length == 0)
         {
             TempData["ErrorMessage"] = "Please provide a face image for check-out.";
@@ -158,6 +171,9 @@ public class FaceRecognitionController : Controller
             {
                 await faceImage.CopyToAsync(memoryStream);
                 var (success, userId) = await _faceService.IdentifyFaceAsync(memoryStream.ToArray());
+                _logger.LogInformation("Face recognition result: {Success}, User ID: {UserId}", success, userId);
+
+
 
                 if (success)
                 {
@@ -305,7 +321,7 @@ public class FaceRecognitionController : Controller
             try
             {
                 var payments = await _payrollService.ProcessAllPaymentsAsync(payPeriodId);
-                TempData["SuccessMessage"] = $"Processed payroll for {payments.Count} employees.";
+                TempData["SuccessMessage"] = $"Processed payroll for {payments.Count()} employees.";
             }
             catch (Exception ex)
             {

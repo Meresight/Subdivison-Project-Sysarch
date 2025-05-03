@@ -70,7 +70,15 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+app.MapControllerRoute(
+    name: "payroll",
+    pattern: "Payroll/{action=Index}/{id?}",
+    defaults: new { controller = "Payroll" });
 
+app.MapControllerRoute(
+    name: "faceRecognition",
+    pattern: "FaceRecognition/{action}/{id?}",
+    defaults: new { controller = "FaceRecognition" });
 // Add API controller routes
 app.MapControllers();
 

@@ -1,16 +1,10 @@
-﻿@using GreenMeadowsPortal.ViewModels
-@model CreatePayPeriodViewModel
-@{
-    ViewData["Title"] = "Create Pay Period - Green Meadows Portal";
-    Layout = null;
-}
-
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Meadows | Create Pay Period</title>
+    <title>@ViewData["Title"] - Green Meadows Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +25,7 @@
                     <img src="/images/default-avatar.png" alt="Admin Avatar">
                 </div>
                 <div class="user-info">
-                    <h4>Admin</h4>
+                    <h4>Admin User</h4>
                     <p>Admin</p>
                 </div>
             </div>
@@ -56,32 +50,9 @@
                     <a href="/FaceRecognition/Enroll"><i class="fas fa-user-plus"></i> Face Enrollment</a>
                 </li>
                 <li class="active">
-                    <a href="/Payroll"><i class="fas fa-money-bill-wave"></i> Payroll</a>
+                    <a href="/Payroll"><i class="fas fa-file-invoice-dollar"></i> Payroll</a>
                 </li>
-                <li>
-                    <a href="/Facilities"><i class="fas fa-swimming-pool"></i> Facilities</a>
-                </li>
-                <li>
-                    <a href="/ServiceRequests"><i class="fas fa-tools"></i> Service Requests</a>
-                </li>
-                <li>
-                    <a href="/Documents"><i class="fas fa-file-alt"></i> Documents</a>
-                </li>
-                <li>
-                    <a href="/Forum"><i class="fas fa-comments"></i> Community Forum</a>
-                </li>
-                <li>
-                    <a href="/Security"><i class="fas fa-shield-alt"></i> Security</a>
-                </li>
-                <li>
-                    <a href="/Events"><i class="fas fa-calendar-alt"></i> Events</a>
-                </li>
-                <li>
-                    <a href="/Reports"><i class="fas fa-chart-bar"></i> Reports</a>
-                </li>
-                <li>
-                    <a href="/Settings"><i class="fas fa-cog"></i> Settings</a>
-                </li>
+                <!-- More menu items -->
             </ul>
 
             <div class="sidebar-footer">
@@ -127,64 +98,7 @@
 
             <!-- Page Content -->
             <main class="main-content">
-                <div class="page-header">
-                    <h1>Create Pay Period</h1>
-                    <nav class="breadcrumb">
-                        <a asp-controller="Dashboard" asp-action="AdminDashboard">Admin</a> /
-                        <a asp-controller="Payroll" asp-action="Index">Payroll</a> /
-                        Create Pay Period
-                    </nav>
-                </div>
-
-                <!-- Success/Error Messages -->
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
-                        <button class="close-alert"><i class="fas fa-times"></i></button>
-                    </div>
-                }
-
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
-                        <button class="close-alert"><i class="fas fa-times"></i></button>
-                    </div>
-                }
-
-                <div class="content-section">
-                    <div class="section-header">
-                        <h2>Pay Period Details</h2>
-                    </div>
-
-                    <form asp-action="CreatePayPeriod" method="post">
-                        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
-
-                        <div class="form-group">
-                            <label asp-for="StartDate" class="form-label">Start Date</label>
-                            <input asp-for="StartDate" class="form-control" type="date" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="EndDate" class="form-label">End Date</label>
-                            <input asp-for="EndDate" class="form-control" type="date" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="Notes" class="form-label">Notes (Optional)</label>
-                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Enter any relevant notes about this pay period"></textarea>
-                            <span asp-validation-for="Notes" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-actions">
-                            <a asp-action="Index" class="btn secondary-btn">Cancel</a>
-                            <button type="submit" class="btn primary-btn">Create Pay Period</button>
-                        </div>
-                    </form>
-                </div>
+                @RenderBody()
             </main>
 
             <!-- Footer -->
@@ -250,5 +164,6 @@
             }, 5000);
         });
     </script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -7,6 +7,8 @@ namespace GreenMeadowsPortal.ViewModels
         public string FirstName { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string ProfileImageUrl { get; set; } = string.Empty;
+        public int NotificationCount { get; set; }
+
         public List<PayPeriod> PayPeriods { get; set; } = new List<PayPeriod>();
     }
 }
